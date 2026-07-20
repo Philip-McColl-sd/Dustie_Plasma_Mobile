@@ -265,7 +265,293 @@ EOF
 log_success "Plasma Mobile lock screen configured as default login"
 
 ################################################################################
-# Step 9: Optional Configurations
+# Step 9: Add "Switch Session" Button to the Logout Screen
+################################################################################
+log_info "Installing Switch Session button..."
+
+# Adds a "Switch Session" button to the phone's power/logout screen that
+# reaches the real SDDM greeter (session/DE picker) instead of the phone
+# lock screen. Builds on the autologin setup from Step 8.
+
+# 9.1 One-shot helper: hides autologin.conf and forces sddm to reload it.
+#    Two non-obvious facts, both confirmed live:
+#    - SDDM still reads a file inside /etc/sddm.conf.d/ even if you just
+#      rename its extension (e.g. .conf.disabled) -- it must be moved
+#      fully OUT of that directory.
+#    - SDDM's daemon process reads config ONCE at startup and caches it.
+#      A plain logout/display cycle within the same long-running sddm
+#      process reuses the cached config and autologins anyway. Only a
+#      full `systemctl restart sddm` makes it re-read the file, so this
+#      helper schedules that restart a few seconds out (detached, since
+#      this whole process/session gets torn down by the logout that
+#      follows immediately after it runs).
+sudo tee /usr/local/bin/plasma-mobile-disable-autologin-once.sh > /dev/null <<'EOF'
+#!/bin/sh
+mkdir -p /root/sddm-conf-backup
+if [ -f /etc/sddm.conf.d/autologin.conf ]; then
+    mv /etc/sddm.conf.d/autologin.conf /root/sddm-conf-backup/autologin.conf
+fi
+systemd-run --on-active=6s --description="Restart sddm to pick up disabled autologin" /usr/bin/systemctl restart sddm
+EOF
+sudo chmod 755 /usr/local/bin/plasma-mobile-disable-autologin-once.sh
+
+# 9.2 The button is triggered from the GUI (no terminal to type a password
+#    into), so it needs passwordless sudo for just this one helper script.
+echo "${TARGET_USER} ALL=(root) NOPASSWD: /usr/local/bin/plasma-mobile-disable-autologin-once.sh" | \
+    sudo tee /etc/sudoers.d/plasma-mobile-switch-session > /dev/null
+sudo chmod 0440 /etc/sudoers.d/plasma-mobile-switch-session
+sudo visudo -c -f /etc/sudoers.d/plasma-mobile-switch-session || error_exit "Invalid sudoers rule for switch-session"
+
+# 9.3 Restore autologin automatically once a session starts normally again
+#    (extends the lock-on-login.desktop from Step 8).
+cat > "$HOME/.config/autostart/lock-on-login.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Lock on login
+Exec=/bin/sh -c "sleep 2 && loginctl lock-session; if [ -f /root/sddm-conf-backup/autologin.conf ]; then sudo -n mv /root/sddm-conf-backup/autologin.conf /etc/sddm.conf.d/autologin.conf; fi"
+X-KDE-autostart-phase=2
+NoDisplay=true
+EOF
+
+# 9.4 Replace the logout screen's "switch user" button. The stock button
+#    calls sessionManagement.switchUser(), which spawns a SECOND full
+#    Wayland session concurrently with the first -- two compositors
+#    fighting over this Pi's single GPU is what froze the display. This
+#    version does a normal sequential logout instead (never two sessions
+#    alive at once), after disabling autologin so the logout actually
+#    lands on the real greeter.
+LOGOUT_QML="/usr/share/plasma/look-and-feel/org.kde.breeze.mobile/contents/logout/Logout.qml"
+if [ ! -f "$LOGOUT_QML" ]; then
+    error_exit "Logout.qml not found at $LOGOUT_QML - is plasma-mobile fully installed?"
+fi
+
+if [ ! -f "${LOGOUT_QML}.backup" ]; then
+    sudo cp "$LOGOUT_QML" "${LOGOUT_QML}.backup"
+fi
+
+sudo tee "$LOGOUT_QML" > /dev/null <<'EOF'
+/*
+ *   SPDX-FileCopyrightText: 2014 Aleix Pol Gonzalez <aleixpol@blue-systems.com>
+ *   SPDX-FileCopyrightText: 2020 Linus Jahn <lnj@kaidan.im>
+ *   SPDX-FileCopyrightText: 2020 Marco Martin <mart@kde.org
+ *   SPDX-FileCopyrightText: 2022 Seshan Ravikumar <seshan10@me.com>
+ *
+ *   SPDX-License-Identifier: GPL-2.0-or-later
+ */
+
+import QtQuick 2.12
+import QtQuick.Layouts 1.12
+import QtQuick.Controls 2.8 as Controls
+
+import org.kde.kirigami 2.20 as Kirigami
+import org.kde.coreaddons 1.0 as KCoreAddons
+
+import org.kde.plasma.private.sessions 2.0
+import org.kde.plasma.private.mobileshell.shellsettingsplugin as ShellSettings
+import org.kde.plasma.plasma5support as Plasma5Support
+
+Item {
+    id: root
+
+    Kirigami.Theme.colorSet: Kirigami.Theme.Complementary
+    Kirigami.Theme.inherit: false
+    signal logoutRequested()
+    signal haltRequested()
+    signal suspendRequested(int spdMethod)
+    signal rebootRequested()
+    signal rebootRequested2(int opt)
+    signal cancelRequested()
+    signal lockScreenRequested()
+
+    Controls.Action {
+        onTriggered: root.cancelRequested()
+        shortcut: "Escape"
+    }
+
+    SessionManagement {
+        id: sessionManagement
+    }
+
+    // Runs plasma-mobile-disable-autologin-once.sh (passwordless sudo) so the
+    // next SDDM display shows the real greeter/session-picker instead of
+    // autologin silently re-entering plasma-mobile. Only logs out once this
+    // finishes, so there is never a second concurrent Wayland session fighting
+    // the first one for the GPU (that dual-session race is what froze the
+    // display when this button used to call sessionManagement.switchUser()).
+    Plasma5Support.DataSource {
+        id: disableAutologinSource
+        engine: "executable"
+        connectedSources: []
+        onNewData: (sourceName, data) => {
+            disconnectSource(sourceName);
+            closeAnim.closeToBlack = true;
+            closeAnim.execute(root.logoutRequested);
+        }
+        function run() {
+            connectSource("sudo -n /usr/local/bin/plasma-mobile-disable-autologin-once.sh");
+        }
+    }
+
+    Rectangle {
+        id: blackOverlay
+        anchors.fill: parent
+        color: "black"
+        opacity: 0
+        z: opacity > 0 ? 1 : 0
+    }
+
+    Rectangle {
+        id: background
+        anchors.fill: parent
+        color: Kirigami.Theme.backgroundColor
+        opacity: 0
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            closeAnim.execute(root.cancelRequested);
+        }
+    }
+
+    Component.onCompleted: openAnim.restart()
+    onVisibleChanged: {
+        if (visible) {
+            openAnim.restart()
+        }
+    }
+
+    ParallelAnimation {
+        id: openAnim
+        running: true
+        OpacityAnimator {
+            target: buttons
+            from: 0
+            to: 1
+            duration: Kirigami.Units.longDuration
+            easing.type: Easing.InOutQuad
+        }
+        OpacityAnimator {
+            target: background
+            from: 0
+            to: 0.6
+            duration: Kirigami.Units.longDuration
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    SequentialAnimation {
+        id: closeAnim
+        running: false
+
+        property bool closeToBlack: false
+        property var callback
+        function execute(call) {
+            callback = call;
+            closeAnim.restart();
+        }
+        ParallelAnimation {
+            OpacityAnimator {
+                target: buttons
+                from: 1
+                to: 0
+                duration: Kirigami.Units.longDuration
+                easing.type: Easing.InOutQuad
+            }
+            OpacityAnimator {
+                target: background
+                from: 0.6
+                to: 0
+                duration: Kirigami.Units.longDuration
+                easing.type: Easing.InOutQuad
+            }
+            OpacityAnimator {
+                target: blackOverlay
+                from: 0
+                to: closeAnim.closeToBlack ? 1 : 0
+                duration: Kirigami.Units.longDuration
+                easing.type: Easing.InOutQuad
+            }
+        }
+        ScriptAction {
+            script: {
+                if (closeAnim.callback) {
+                    closeAnim.callback();
+                }
+                buttons.opacity = 1;
+                background.opacity = 0.6;
+            }
+        }
+    }
+
+    Item {
+        id: buttons
+        anchors.fill: parent
+        opacity: 0
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: Kirigami.Units.gridUnit
+
+            ActionButton {
+                iconSource: "system-reboot"
+                text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Restart")
+                onClicked: {
+                    closeAnim.closeToBlack = true;
+                    closeAnim.execute(root.rebootRequested);
+                }
+            }
+
+            ActionButton {
+                iconSource: "system-shutdown"
+                text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Shut Down")
+                onClicked: {
+                    closeAnim.closeToBlack = true;
+                    closeAnim.execute(root.haltRequested);
+                }
+            }
+
+            ActionButton {
+                iconSource: "system-log-out"
+                text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Log Out")
+                visible: ShellSettings.Settings.allowLogout
+                onClicked: {
+                    closeAnim.closeToBlack = true;
+                    closeAnim.execute(root.logoutRequested);
+                }
+            }
+
+            ActionButton {
+                iconSource: "system-switch-user"
+                text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Switch Session")
+                visible: ShellSettings.Settings.allowLogout
+                onClicked: {
+                    disableAutologinSource.run();
+                }
+            }
+        }
+
+        ActionButton {
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: Kirigami.Units.gridUnit
+                horizontalCenter: parent.horizontalCenter
+            }
+            iconSource: "dialog-cancel"
+            text: i18nd("plasma_lookandfeel_org.kde.lookandfeel", "Cancel")
+            onClicked: {
+                closeAnim.closeToBlack = false;
+                closeAnim.execute(root.cancelRequested);
+            }
+        }
+    }
+}
+EOF
+
+log_success "Switch Session button installed"
+
+################################################################################
+# Step 10: Optional Configurations
 ################################################################################
 log_info "Applying optional configurations..."
 
@@ -291,7 +577,7 @@ if [ -n "$CONFIG_FILE" ]; then
 fi
 
 ################################################################################
-# Step 10: Verification
+# Step 11: Verification
 ################################################################################
 log_info "Verifying installation..."
 
@@ -323,8 +609,16 @@ else
     log_warning "Lock screen login config not found (non-fatal)"
 fi
 
+# Check if the Switch Session button was installed
+if [ -f /usr/local/bin/plasma-mobile-disable-autologin-once.sh ] && \
+   grep -q "Switch Session" "$LOGOUT_QML" 2>/dev/null; then
+    log_success "Switch Session button verified"
+else
+    log_warning "Switch Session button not found (non-fatal)"
+fi
+
 ################################################################################
-# Step 11: Installation Complete
+# Step 12: Installation Complete
 ################################################################################
 echo ""
 echo "################################################################################"
@@ -339,13 +633,15 @@ log_info "Next steps:"
 echo "  1. Reboot your Raspberry Pi: sudo reboot"
 echo "  2. After reboot, you will boot straight into the Plasma Mobile lock screen"
 echo "  3. Unlock with your username and password"
-echo "  4. Enjoy your mobile Linux experience!"
+echo "  4. Use power menu → 'Switch Session' to reach the SDDM greeter/session picker"
+echo "  5. Enjoy your mobile Linux experience!"
 echo ""
 log_info "Optional configurations:"
 echo "  - Rotate display: Edit $CONFIG_FILE and add 'display_rotate=1'"
 echo "  - Install more apps: sudo apt search <app-name>"
 echo "  - Configure keyboard: Settings → Input Devices → Keyboard"
 echo "  - Undo lock-screen-as-login: sudo rm /etc/sddm.conf.d/autologin.conf ~/.config/autostart/lock-on-login.desktop"
+echo "  - Undo Switch Session button: sudo cp ${LOGOUT_QML}.backup ${LOGOUT_QML}; sudo rm /usr/local/bin/plasma-mobile-disable-autologin-once.sh /etc/sudoers.d/plasma-mobile-switch-session"
 echo ""
 log_info "Troubleshooting:"
 echo "  - If screen is black: sudo systemctl restart sddm"
