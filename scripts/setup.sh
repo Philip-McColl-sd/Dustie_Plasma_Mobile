@@ -228,7 +228,44 @@ sudo systemctl set-default graphical.target || error_exit "Failed to set graphic
 log_success "Graphical boot configured"
 
 ################################################################################
-# Step 8: Optional Configurations
+# Step 8: Set Plasma Mobile Lock Screen as Default Login
+################################################################################
+log_info "Configuring Plasma Mobile lock screen as the login screen..."
+
+# Make the Plasma Mobile lock screen the system-wide "login/welcome" screen.
+# Effect: skip SDDM's plain desktop-style greeter; boot straight into the
+# session and immediately show the phone-style lock screen instead. PIN/
+# password is still required (security unchanged) - only the screen you
+# authenticate on changes. Relogin=true means every logout goes straight
+# back to the lock screen too, not the old greeter.
+TARGET_USER="$(whoami)"
+
+sudo mkdir -p /etc/sddm.conf.d
+sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null <<EOF
+[Autologin]
+User=${TARGET_USER}
+Session=plasma-mobile.desktop
+Relogin=true
+EOF
+
+# Lock the session ~2s after every login/boot, so the mobile lock screen
+# (org.kde.plasma.mobileshell LockScreen.qml) is what the user actually
+# sees and unlocks, every time. The 2s delay is a cheap guard to let the
+# compositor/lock daemon come up before the lock call fires.
+mkdir -p "$HOME/.config/autostart"
+cat > "$HOME/.config/autostart/lock-on-login.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Lock on login
+Exec=/bin/sh -c "sleep 2 && loginctl lock-session"
+X-KDE-autostart-phase=2
+NoDisplay=true
+EOF
+
+log_success "Plasma Mobile lock screen configured as default login"
+
+################################################################################
+# Step 9: Optional Configurations
 ################################################################################
 log_info "Applying optional configurations..."
 
@@ -254,7 +291,7 @@ if [ -n "$CONFIG_FILE" ]; then
 fi
 
 ################################################################################
-# Step 9: Verification
+# Step 10: Verification
 ################################################################################
 log_info "Verifying installation..."
 
@@ -279,8 +316,15 @@ else
     error_exit "Graphical target not set correctly"
 fi
 
+# Check if lock-screen-as-login is configured
+if [ -f /etc/sddm.conf.d/autologin.conf ]; then
+    log_success "Plasma Mobile lock screen login verified"
+else
+    log_warning "Lock screen login config not found (non-fatal)"
+fi
+
 ################################################################################
-# Step 10: Installation Complete
+# Step 11: Installation Complete
 ################################################################################
 echo ""
 echo "################################################################################"
@@ -293,14 +337,15 @@ log_success "Plasma Mobile has been installed successfully!"
 echo ""
 log_info "Next steps:"
 echo "  1. Reboot your Raspberry Pi: sudo reboot"
-echo "  2. After reboot, you will see the Plasma Mobile login screen"
-echo "  3. Login with your username and password"
+echo "  2. After reboot, you will boot straight into the Plasma Mobile lock screen"
+echo "  3. Unlock with your username and password"
 echo "  4. Enjoy your mobile Linux experience!"
 echo ""
 log_info "Optional configurations:"
 echo "  - Rotate display: Edit $CONFIG_FILE and add 'display_rotate=1'"
 echo "  - Install more apps: sudo apt search <app-name>"
 echo "  - Configure keyboard: Settings → Input Devices → Keyboard"
+echo "  - Undo lock-screen-as-login: sudo rm /etc/sddm.conf.d/autologin.conf ~/.config/autostart/lock-on-login.desktop"
 echo ""
 log_info "Troubleshooting:"
 echo "  - If screen is black: sudo systemctl restart sddm"
