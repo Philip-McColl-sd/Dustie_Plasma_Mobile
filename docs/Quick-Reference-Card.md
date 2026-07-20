@@ -65,6 +65,42 @@ sudo systemctl set-default graphical.target
 sudo reboot
 ```
 
+## 📡 Cellular Modem Setup (Optional) — Waveshare SIM7600G-H 4G HAT
+
+### 11. Physical Setup (BEFORE powering anything on)
+1. Insert SIM fully, correct orientation, until it clicks/seats
+   (hot-swap while running is NOT detected)
+2. Click both antennas firmly onto the HAT:
+   - MAIN = required (TX+RX)
+   - AUX = optional (RX diversity)
+   - Press until the u.FL connector seats — a loose MAIN antenna looks fine
+     on signal but silently fails to attach
+3. Seat the HAT firmly on the Pi's GPIO header
+
+### 12. Power On (once, cleanly)
+```bash
+# Power the Pi first, then hold the modem's PWR button ~2-3s
+# Don't touch SIM/antennas after this - any change needs a full power cycle
+```
+
+### 13. Check Registration
+```bash
+mmcli -L
+mmcli -m 0
+```
+Look for: `state: registered`, `registration: home`,
+`packet service state: attached`
+
+### 14. Test a Voice Call
+```bash
+sudo mmcli -m 0 --voice-create-call="number=+56XXXXXXXXX"
+mmcli --call=<path>
+```
+Expected: `dialing` → `ringing-out` → `answered`
+(Audio needs SPK+/SPK-/MIC+/MIC- wired to a speaker/mic — not covered here)
+
+**Still open:** data/internet (NetworkManager GSM connection + APN)
+
 ## 🔧 Quick Fixes
 
 ### Rotate Screen (90° clockwise)
@@ -110,6 +146,9 @@ journalctl -xe
 | Network errors | Disable IPv6 (see step 5) |
 | SSH fails | IP changed, get new IP with `hostname -I` |
 | Black screen | `sudo systemctl restart sddm` |
+| Modem stuck "searching" | Power cycle with SIM/antennas seated before power-on (step 11-12) |
+| Call stuck "dialing", self-terminates | Registration/attach problem — recheck step 13, not a dialing issue |
+| `mmcli --command` → "Unauthorized: debug mode" | Restart ModemManager in debug mode (see full guide) |
 
 ## 📦 Useful Commands
 

@@ -177,6 +177,99 @@ The system will restart and boot directly into Plasma Mobile!
 
 ---
 
+## Step 8: Connect Cellular Modem (Optional) — Waveshare SIM7600G-H 4G HAT
+
+Adds cellular voice/data hardware via the Waveshare SIM7600G-H LTE HAT. This
+procedure is confirmed working for network registration, packet-service
+attach, and a successful voice call.
+
+### 8.1 Physical Setup (do all of this BEFORE powering anything on)
+
+1. **Insert the SIM** fully, correct orientation, until it clicks/seats
+   completely.
+   - The modem only checks for a SIM at its own power-on — a hot-swap while
+     it's running will **not** be detected. This must happen before step 8.2.
+
+2. **Firmly click both antennas** onto the HAT:
+   - **MAIN** is required (TX+RX)
+   - **AUX** is optional but recommended (RX diversity)
+   - Press straight down until you feel/hear the u.FL connector seat. A loose
+     MAIN antenna gives good-looking signal readings but silent attach
+     failures (weak uplink, fine downlink) — this is the single biggest
+     source of wasted troubleshooting time.
+
+3. **Seat the HAT firmly** on the Pi's GPIO header.
+
+### 8.2 Power On (once, cleanly)
+
+4. Power the Pi, then power the modem (hold the PWR button ~2-3s).
+   Don't touch the SIM or antennas again after this point — if you do, you
+   must repeat a full power cycle. Hot-adjustments don't get picked up.
+
+### 8.3 Verify Registration
+
+5. Wait ~30-60s, then check:
+   ```bash
+   mmcli -L
+   mmcli -m 0
+   ```
+   Look for:
+   ```
+   state: registered
+   registration: home
+   packet service state: attached
+   ```
+   Getting stuck on "searching" for 90s+ almost never resolves itself by
+   waiting longer or poking it with AT commands — the fix is always a clean
+   power cycle with SIM/antenna properly seated, not live reconfiguration.
+
+### 8.4 Test a Voice Call
+
+6. Once registered and attached, dial with:
+   ```bash
+   sudo mmcli -m 0 --voice-create-call="number=+56XXXXXXXXX"
+   ```
+   (needs `sudo` — PolicyKit blocks the Voice interface for a regular user by
+   default)
+
+   Watch call state via:
+   ```bash
+   mmcli --call=<path>
+   ```
+   Expected progression: `dialing` -> `ringing-out` -> `answered`
+
+   If it stays stuck in `dialing` and self-terminates after ~30s, that's a
+   registration/attach problem, not a dialing problem — go back to 8.2-8.3.
+
+   **Note:** this only gets you call signaling (ring/connect/hangup). Actual
+   audio needs the HAT's SPK+/SPK-/MIC+/MIC- pins wired to a real
+   speaker/mic — not covered by this procedure.
+
+### 8.5 What Not To Do
+
+- Don't chase registration issues with live `AT+COPS` / `AT+CNMP` mode
+  switching while troubleshooting — it's easy to leave the modem in a bad
+  manually-locked state, which makes things worse. If it's stuck, power
+  cycle instead of reconfiguring.
+- `mmcli -m X --command=...` needs ModemManager restarted in debug mode:
+  ```bash
+  sudo systemctl stop ModemManager
+  sudo /usr/sbin/ModemManager --debug &
+  ```
+  Otherwise you get `Unauthorized: debug mode`. Remember to restore the
+  normal service afterward:
+  ```bash
+  sudo systemctl start ModemManager
+  ```
+
+### 8.6 Still Open
+
+Data/internet setup (NetworkManager GSM connection + APN) is not yet
+configured. The registered/attached state from 8.3 is the prerequisite,
+which is now reliably achievable via the procedure above.
+
+---
+
 ## Post-Installation Configuration
 
 ### Setting Up Keyboard Layout
@@ -237,6 +330,26 @@ dmesg | grep -i touch
 - Increase GPU memory allocation
 - Consider using an SSD instead of SD card
 
+### Issue: SIM7600G-H modem stuck "searching" and never registers
+**Solution:** Power cycle with the SIM and both antennas properly seated
+(see Step 8.1-8.2). Waiting longer or sending AT commands rarely helps —
+a hot SIM swap or a loose MAIN antenna won't be detected until a fresh
+power-on.
+
+### Issue: Voice call stays in "dialing" and self-terminates (~30s)
+**Solution:** This is a registration/attach problem, not a dialing problem.
+Re-check `mmcli -m 0` shows `state: registered` and `packet service state:
+attached` (Step 8.3) before retrying the call.
+
+### Issue: `mmcli -m X --command=...` returns "Unauthorized: debug mode"
+**Solution:** ModemManager needs to be running in debug mode for that
+command:
+```bash
+sudo systemctl stop ModemManager
+sudo /usr/sbin/ModemManager --debug &
+```
+Restore the normal service afterward with `sudo systemctl start ModemManager`.
+
 ---
 
 ## What Worked vs What Didn't
@@ -294,11 +407,19 @@ This installation gives you:
 **Limitations:**
 - Not all hardware features may work perfectly (depends on your specific setup)
 - Performance depends heavily on SD card speed and RAM amount
-- Some mobile-specific features (GPS, cellular) require additional hardware
+- Some mobile-specific features (GPS, cellular) require additional hardware —
+  cellular voice/registration is covered in Step 8 (Waveshare SIM7600G-H
+  4G HAT); mobile data (APN/NetworkManager GSM connection) is still open
 
 ---
 
 ## Changelog
+
+**2026-07-20:** Added Step 8 — Cellular Modem (Waveshare SIM7600G-H 4G HAT)
+- Documented physical setup, power-on sequence, registration check, and a
+  confirmed-working voice call procedure
+- Added related troubleshooting entries and updated Limitations
+- Data/internet (APN) setup remains open for a future update
 
 **2025-10-25:** Initial guide created after successful installation
 - Documented the working solution: Raspberry Pi OS + apt install

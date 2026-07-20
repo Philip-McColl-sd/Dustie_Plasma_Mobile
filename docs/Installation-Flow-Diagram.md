@@ -228,6 +228,59 @@ graph LR
     style H fill:#90EE90
 ```
 
+## Cellular Modem Setup Flow (Optional — Waveshare SIM7600G-H 4G HAT)
+
+```mermaid
+flowchart TD
+    MStart([Goal: Enable cellular via SIM7600G-H]) --> Physical[Insert SIM fully seated + click MAIN/AUX antennas + seat HAT on GPIO]
+    Physical --> PowerOn[Power the Pi, then hold modem PWR ~2-3s]
+    PowerOn --> Touch{Touch SIM or antennas after this point?}
+    Touch -->|Yes| FullCycle[Adjustment not detected - must repeat full power cycle]
+    FullCycle --> PowerOn
+    Touch -->|No| WaitReg[Wait 30-60s, check: mmcli -L / mmcli -m 0]
+
+    WaitReg --> RegState{state: registered AND packet service: attached?}
+    RegState -->|Stuck 'searching' 90s+| Tempted{Try AT+COPS / AT+CNMP live reconfig?}
+    Tempted -->|Yes| WorseState[❌ Risk: modem left in bad manually-locked state]
+    WorseState --> PowerOn
+    Tempted -->|No, power cycle instead| PowerOn
+
+    RegState -->|Yes| Dial[sudo mmcli -m 0 --voice-create-call]
+    Dial --> CallProgress{Call progression?}
+    CallProgress -->|dialing -> ringing-out -> answered| CallOK[✅ Voice call confirmed working]
+    CallProgress -->|Stuck 'dialing', self-terminates ~30s| NotDialIssue[Not a dialing problem - registration/attach issue]
+    NotDialIssue --> WaitReg
+
+    CallOK --> AudioGap[Audio needs SPK+/SPK-/MIC+/MIC- wired to speaker/mic - not yet done]
+    AudioGap --> DataGap[Still open: NetworkManager GSM connection + APN for data]
+
+    style CallOK fill:#90EE90
+    style FullCycle fill:#FFB6C6
+    style WorseState fill:#FFB6C6
+    style NotDialIssue fill:#FFB6C6
+    style Tempted fill:#FFFACD
+```
+
+### Key Decision Points
+
+**Physical setup order matters:** SIM detection only happens at the modem's
+own power-on, so the SIM must be seated before step "Power On" — a hot-swap
+while running is silently ignored.
+
+**Antenna seating is a silent-failure trap:** a loose MAIN antenna still
+shows plausible-looking signal readings while uplink quietly fails. Press
+straight down until the u.FL connector clicks.
+
+**Don't live-reconfigure a stuck modem:** `AT+COPS`/`AT+CNMP` mode switches
+while troubleshooting a "searching" state tend to leave the modem
+manually-locked in a worse state. A clean power cycle (with SIM/antennas
+already seated) is the reliable fix, not further poking.
+
+**A stuck "dialing" call is a registration problem:** if a call
+self-terminates after ~30s instead of progressing to `ringing-out`, go back
+and re-verify `registered` + `attached` state rather than debugging the
+dial command itself.
+
 ## Common Pitfalls and Solutions
 
 | Issue | Symptom | Solution |
@@ -238,6 +291,9 @@ graph LR
 | SSH Failed | Can't connect after reboot | IP changed, get new IP |
 | Warnings | Thousands of warning messages | Normal, ignore them |
 | nmtui Missing | Can't configure WiFi with nmtui | Use raspi-config instead |
+| Modem won't register | Stuck on "searching" 90s+ | Power cycle with SIM/antennas already seated |
+| Weak/no uplink on cellular | Signal looks fine but calls/data fail | Reseat MAIN antenna — u.FL connector must click |
+| Call self-terminates while dialing | Stuck "dialing" ~30s then drops | Registration/attach issue, not a dialing issue |
 
 ## Timeline: Typical Installation
 
