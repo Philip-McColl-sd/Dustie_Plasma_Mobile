@@ -14,8 +14,8 @@ This guide documents the proven installation method for Plasma Mobile on a Raspb
 - postmarketOS requires building from source (complex)
 
 **The Solution:**
-- Raspberry Pi OS is based on Debian Bookworm
-- Debian Bookworm HAS plasma-mobile packages in its repositories
+- Raspberry Pi OS is based on Debian (originally Bookworm; currently running on Debian 13 Trixie)
+- Debian HAS plasma-mobile packages in its repositories
 - We can install a minimal OS and add Plasma Mobile on top
 
 ---
@@ -356,7 +356,7 @@ Restore the normal service afterward with `sudo systemctl start ModemManager`.
 
 ### ✅ What WORKED:
 - **Raspberry Pi OS (64-bit) Lite + manual plasma-mobile installation**
-- Debian Bookworm has all necessary packages
+- Debian (Bookworm and Trixie) has all necessary packages
 - SSH access for easier command entry
 - Minimal flash configuration to avoid boot issues
 
@@ -374,10 +374,11 @@ Restore the normal service afterward with `sudo systemctl start ModemManager`.
 The key difference is that **Debian includes plasma-mobile packages in its repositories**, while Ubuntu does not.
 
 You can verify package availability:
+- Debian Trixie: https://packages.debian.org/trixie/plasma-mobile
 - Debian Bookworm: https://packages.debian.org/bookworm/plasma-mobile
 - Ubuntu: No equivalent package
 
-Since Raspberry Pi OS is based on Debian Bookworm, it has access to all Debian packages, including plasma-mobile.
+Since Raspberry Pi OS is based on Debian, it has access to all Debian packages, including plasma-mobile.
 
 ---
 
@@ -415,6 +416,12 @@ This installation gives you:
 
 ## Changelog
 
+**2026-10-23:** Synced with the live device
+- Fixed autologin never being restored after "Switch Session" (the restore
+  check ran as the session user, which can't read `/root`); `setup.sh` now
+  installs a root-side restore helper
+- Updated OS references: the device now runs Debian 13 Trixie
+
 **2026-07-20:** Added Step 8 — Cellular Modem (Waveshare SIM7600G-H 4G HAT)
 - Documented physical setup, power-on sequence, registration check, and a
   confirmed-working voice call procedure
@@ -430,5 +437,5 @@ This installation gives you:
 
 **Generated:** October 25, 2025  
 **Tested on:** Raspberry Pi 4B  
-**OS Version:** Raspberry Pi OS (64-bit) Lite, based on Debian Bookworm  
-**Plasma Mobile Version:** Available in Debian Bookworm repositories
+**OS Version:** Raspberry Pi OS (64-bit) Lite, based on Debian 13 Trixie (originally installed on Bookworm)  
+**Plasma Mobile Version:** Available in Debian Trixie repositories

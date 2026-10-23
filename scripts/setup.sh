@@ -295,25 +295,50 @@ systemd-run --on-active=6s --description="Restart sddm to pick up disabled autol
 EOF
 sudo chmod 755 /usr/local/bin/plasma-mobile-disable-autologin-once.sh
 
-# 9.2 The button is triggered from the GUI (no terminal to type a password
-#    into), so it needs passwordless sudo for just this one helper script.
-echo "${TARGET_USER} ALL=(root) NOPASSWD: /usr/local/bin/plasma-mobile-disable-autologin-once.sh" | \
+# 9.2 Root-side restore helper: puts autologin.conf back if the button moved
+#    it aside. The existence check must run as root -- /root is mode 700, so
+#    a [ -f /root/... ] test run as the session user is always false and the
+#    restore silently never happens (confirmed live: autologin stayed off).
+sudo tee /usr/local/bin/plasma-mobile-restore-autologin.sh > /dev/null <<'EOF'
+#!/bin/sh
+if [ -f /root/sddm-conf-backup/autologin.conf ]; then
+    mkdir -p /etc/sddm.conf.d
+    mv /root/sddm-conf-backup/autologin.conf /etc/sddm.conf.d/autologin.conf
+fi
+EOF
+sudo chmod 755 /usr/local/bin/plasma-mobile-restore-autologin.sh
+
+# 9.3 Both helpers are triggered from the GUI (no terminal to type a
+#    password into), so they need passwordless sudo -- for these two
+#    scripts only.
+echo "${TARGET_USER} ALL=(root) NOPASSWD: /usr/local/bin/plasma-mobile-disable-autologin-once.sh, /usr/local/bin/plasma-mobile-restore-autologin.sh" | \
     sudo tee /etc/sudoers.d/plasma-mobile-switch-session > /dev/null
 sudo chmod 0440 /etc/sudoers.d/plasma-mobile-switch-session
 sudo visudo -c -f /etc/sudoers.d/plasma-mobile-switch-session || error_exit "Invalid sudoers rule for switch-session"
 
-# 9.3 Restore autologin automatically once a session starts normally again
-#    (extends the lock-on-login.desktop from Step 8).
+# 9.4 Restore autologin automatically once a session starts normally again
+#    (replaces the lock-on-login.desktop from Step 8). Kept as a script file
+#    rather than an inline Exec= line: Desktop Entry Exec= quoting silently
+#    mangled the nested if/sudo/mv logic, so the restore never ran.
+sudo tee /usr/local/bin/lock-and-restore-autologin.sh > /dev/null <<'EOF'
+#!/bin/sh
+# Runs on every plasma-mobile session start (via lock-on-login.desktop).
+sleep 2
+loginctl lock-session
+sudo -n /usr/local/bin/plasma-mobile-restore-autologin.sh
+EOF
+sudo chmod 755 /usr/local/bin/lock-and-restore-autologin.sh
+
 cat > "$HOME/.config/autostart/lock-on-login.desktop" <<'EOF'
 [Desktop Entry]
 Type=Application
 Name=Lock on login
-Exec=/bin/sh -c "sleep 2 && loginctl lock-session; if [ -f /root/sddm-conf-backup/autologin.conf ]; then sudo -n mv /root/sddm-conf-backup/autologin.conf /etc/sddm.conf.d/autologin.conf; fi"
+Exec=/usr/local/bin/lock-and-restore-autologin.sh
 X-KDE-autostart-phase=2
 NoDisplay=true
 EOF
 
-# 9.4 Replace the logout screen's "switch user" button. The stock button
+# 9.5 Replace the logout screen's "switch user" button. The stock button
 #    calls sessionManagement.switchUser(), which spawns a SECOND full
 #    Wayland session concurrently with the first -- two compositors
 #    fighting over this Pi's single GPU is what froze the display. This
@@ -611,6 +636,7 @@ fi
 
 # Check if the Switch Session button was installed
 if [ -f /usr/local/bin/plasma-mobile-disable-autologin-once.sh ] && \
+   [ -f /usr/local/bin/plasma-mobile-restore-autologin.sh ] && \
    grep -q "Switch Session" "$LOGOUT_QML" 2>/dev/null; then
     log_success "Switch Session button verified"
 else
@@ -641,7 +667,7 @@ echo "  - Rotate display: Edit $CONFIG_FILE and add 'display_rotate=1'"
 echo "  - Install more apps: sudo apt search <app-name>"
 echo "  - Configure keyboard: Settings → Input Devices → Keyboard"
 echo "  - Undo lock-screen-as-login: sudo rm /etc/sddm.conf.d/autologin.conf ~/.config/autostart/lock-on-login.desktop"
-echo "  - Undo Switch Session button: sudo cp ${LOGOUT_QML}.backup ${LOGOUT_QML}; sudo rm /usr/local/bin/plasma-mobile-disable-autologin-once.sh /etc/sudoers.d/plasma-mobile-switch-session"
+echo "  - Undo Switch Session button: sudo cp ${LOGOUT_QML}.backup ${LOGOUT_QML}; sudo rm /usr/local/bin/plasma-mobile-disable-autologin-once.sh /usr/local/bin/plasma-mobile-restore-autologin.sh /usr/local/bin/lock-and-restore-autologin.sh /etc/sudoers.d/plasma-mobile-switch-session"
 echo ""
 log_info "Troubleshooting:"
 echo "  - If screen is black: sudo systemctl restart sddm"

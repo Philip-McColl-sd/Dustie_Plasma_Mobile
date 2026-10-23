@@ -43,7 +43,7 @@ After testing **EVERYTHING** for 2 years:
 
 **The Key Insight:**
 ```
-Raspberry Pi OS → Based on Debian Bookworm → Has plasma-mobile packages → Success!
+Raspberry Pi OS → Based on Debian (Bookworm, now Trixie) → Has plasma-mobile packages → Success!
 ```
 
 ## 🚀 Features After Installation
