@@ -1,4 +1,4 @@
-![Alt text](docs/little-rascal-logo-horizontal (1).png)
+![Alt text](docs/little-rascal-logo-horizontal.png)
 
 ![Alt text](docs/grid2.png)
 # Plasma Mobile on Raspberry Pi 4
