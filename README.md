@@ -2,7 +2,7 @@
 # One-Line Installation! 👾
 ![Alt text](docs/Infograf.png)
 
-[![Ver el video](https://img.youtube.com/vi/0w1ryLOrj5M/hqdefault.jpg)](https://www.youtube.com/watch?v=0w1ryLOrj5M)
+[![Ver el video](docs/video-preview.png)](https://www.youtube.com/watch?v=0w1ryLOrj5M)
 
 
 # Plasma Mobile on Raspberry Pi 4
