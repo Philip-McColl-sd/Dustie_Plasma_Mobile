@@ -1,6 +1,12 @@
+
+
+https://github.com/user-attachments/assets/26ea8611-1727-4cb1-84e5-d8b4e3254495
+
 ![Alt text](docs/little-rascal-logo-horizontal.png)
 # One-Line Installation! 👾
-![Alt text](docs/grid2.png)
+
+https://github.com/user-attachments/assets/26ea8611-1727-4cb1-84e5-d8b4e3254495
+
 # Plasma Mobile on Raspberry Pi 4
 
 <img width="1280" height="488" alt="Plasma_Mobile_logo svg" src="https://github.com/user-attachments/assets/f8bec680-a8c1-426a-8a53-d1a710024abc" />
