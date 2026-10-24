@@ -2,7 +2,7 @@
 
 ## 🚀 One-Line Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/plasma-mobile-rpi4/main/install-plasma-mobile-rpi4.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
 ```
 
 ## 📝 Manual Installation (Copy-Paste Commands)
@@ -31,12 +31,13 @@ hostname -I  # Get IP address
 
 ### 5. Fix IPv6 Issues
 ```bash
-sudo nano /etc/sysctl.conf
+# Debian 13 (Trixie) has no /etc/sysctl.conf; use a drop-in file
+sudo nano /etc/sysctl.d/99-disable-ipv6.conf
 # Add these lines:
 # net.ipv6.conf.all.disable_ipv6 = 1
 # net.ipv6.conf.default.disable_ipv6 = 1
 # net.ipv6.conf.lo.disable_ipv6 = 1
-sudo sysctl -p
+sudo sysctl --system
 ```
 
 ### 6. Update System

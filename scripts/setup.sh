@@ -11,12 +11,12 @@
 #   - Sudo privileges
 #
 # Usage:
-#   wget https://raw.githubusercontent.com/YOUR_USERNAME/plasma-mobile-rpi4/main/install.sh
-#   chmod +x install.sh
-#   ./install.sh
+#   wget https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh
+#   chmod +x setup.sh
+#   ./setup.sh
 #
 # Or one-liner:
-#   curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/plasma-mobile-rpi4/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
 #
 # Version: 1.0
 # Date: 2025-10-25
@@ -77,7 +77,9 @@ echo "##########################################################################
 echo ""
 
 # Confirm before proceeding
-read -p "Do you want to continue? (y/n) " -n 1 -r
+# Prompts read from /dev/tty: under `curl ... | bash`, stdin is the script
+# itself, so a plain `read` would swallow the next line of code.
+read -p "Do you want to continue? (y/n) " -n 1 -r < /dev/tty
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     log_info "Installation cancelled."
@@ -93,12 +95,12 @@ log_info "Gathering system information..."
 if [ ! -f /proc/device-tree/model ]; then
     log_warning "Unable to detect Raspberry Pi model"
 else
-    PI_MODEL=$(cat /proc/device-tree/model)
+    PI_MODEL=$(tr -d '\0' < /proc/device-tree/model)
     log_info "Detected: $PI_MODEL"
     
     if [[ ! "$PI_MODEL" =~ "Raspberry Pi 4" ]]; then
         log_warning "This script is designed for Raspberry Pi 4. Your device: $PI_MODEL"
-        read -p "Continue anyway? (y/n) " -n 1 -r
+        read -p "Continue anyway? (y/n) " -n 1 -r < /dev/tty
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 0
@@ -112,7 +114,7 @@ log_info "Architecture: $ARCH"
 
 if [[ "$ARCH" != "aarch64" ]]; then
     log_warning "This script requires ARM64 architecture. Detected: $ARCH"
-    read -p "Continue anyway? (y/n) " -n 1 -r
+    read -p "Continue anyway? (y/n) " -n 1 -r < /dev/tty
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         exit 0
@@ -141,25 +143,23 @@ log_success "Network connectivity confirmed"
 ################################################################################
 log_info "Configuring IPv6 settings..."
 
-# Check if already configured
-if grep -q "net.ipv6.conf.all.disable_ipv6" /etc/sysctl.conf; then
-    log_info "IPv6 already disabled in sysctl.conf"
+# Debian 13 (Trixie) no longer ships /etc/sysctl.conf; use a drop-in file.
+IPV6_CONF=/etc/sysctl.d/99-disable-ipv6.conf
+if [ -f "$IPV6_CONF" ]; then
+    log_info "IPv6 already disabled ($IPV6_CONF)"
 else
     log_info "Disabling IPv6 to prevent download issues..."
-    
-    # Backup original sysctl.conf
-    sudo cp /etc/sysctl.conf /etc/sysctl.conf.backup
-    
-    # Add IPv6 disable configuration
-    echo "" | sudo tee -a /etc/sysctl.conf > /dev/null
-    echo "# Disable IPv6 for Plasma Mobile installation" | sudo tee -a /etc/sysctl.conf > /dev/null
-    echo "net.ipv6.conf.all.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf > /dev/null
-    echo "net.ipv6.conf.default.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf > /dev/null
-    echo "net.ipv6.conf.lo.disable_ipv6 = 1" | sudo tee -a /etc/sysctl.conf > /dev/null
-    
+
+    sudo tee "$IPV6_CONF" > /dev/null <<'EOF'
+# Disable IPv6 for Plasma Mobile installation
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+EOF
+
     # Apply changes
-    sudo sysctl -p > /dev/null
-    
+    sudo sysctl --system > /dev/null
+
     log_success "IPv6 disabled successfully"
 fi
 
@@ -219,8 +219,13 @@ log_success "SDDM installed"
 ################################################################################
 log_info "Configuring graphical boot..."
 
-# Enable SDDM service
-sudo systemctl enable sddm || error_exit "Failed to enable SDDM"
+# Only one service can own display-manager.service. Raspberry Pi OS images
+# with a desktop ship LightDM, which makes a plain `enable sddm` fail.
+for dm in lightdm gdm3 gdm lxdm; do
+    sudo systemctl disable "$dm" 2>/dev/null || true
+done
+echo "/usr/sbin/sddm" | sudo tee /etc/X11/default-display-manager > /dev/null
+sudo systemctl enable --force sddm || error_exit "Failed to enable SDDM"
 
 # Set default target to graphical
 sudo systemctl set-default graphical.target || error_exit "Failed to set graphical target"
@@ -240,11 +245,19 @@ log_info "Configuring Plasma Mobile lock screen as the login screen..."
 # back to the lock screen too, not the old greeter.
 TARGET_USER="$(whoami)"
 
+# Session= must match the installed .desktop file name exactly.
+PLASMA_SESSION=$(ls /usr/share/wayland-sessions/ 2>/dev/null | grep -m 1 -i '^plasma-mobile.*\.desktop$' || true)
+if [ -z "$PLASMA_SESSION" ]; then
+    log_warning "No plasma-mobile session in /usr/share/wayland-sessions/; assuming plasma-mobile.desktop"
+    PLASMA_SESSION="plasma-mobile.desktop"
+fi
+log_info "Autologin session: $PLASMA_SESSION"
+
 sudo mkdir -p /etc/sddm.conf.d
 sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null <<EOF
 [Autologin]
 User=${TARGET_USER}
-Session=plasma-mobile.desktop
+Session=${PLASMA_SESSION}
 Relogin=true
 EOF
 
@@ -620,6 +633,14 @@ else
     error_exit "SDDM not found"
 fi
 
+# Check that SDDM (not LightDM) owns the display manager slot
+DM_TARGET="$(readlink -f /etc/systemd/system/display-manager.service)"
+if [[ "$DM_TARGET" == */sddm.service ]]; then
+    log_success "SDDM is the active display manager"
+else
+    error_exit "display-manager.service points to ${DM_TARGET:-nothing}, not SDDM"
+fi
+
 # Check if graphical target is set
 if systemctl get-default | grep -q "graphical.target"; then
     log_success "Graphical target verified"
@@ -663,7 +684,7 @@ echo "  4. Use power menu → 'Switch Session' to reach the SDDM greeter/session
 echo "  5. Enjoy your mobile Linux experience!"
 echo ""
 log_info "Optional configurations:"
-echo "  - Rotate display: Edit $CONFIG_FILE and add 'display_rotate=1'"
+echo "  - Rotate display: in Plasma run 'kscreen-doctor -o', then e.g. 'kscreen-doctor output.HDMI-A-1.rotation.right'"
 echo "  - Install more apps: sudo apt search <app-name>"
 echo "  - Configure keyboard: Settings → Input Devices → Keyboard"
 echo "  - Undo lock-screen-as-login: sudo rm /etc/sddm.conf.d/autologin.conf ~/.config/autostart/lock-on-login.desktop"
@@ -676,7 +697,7 @@ echo "  - SSH access: ssh $(whoami)@$(hostname -I | awk '{print $1}')"
 echo ""
 
 # Ask if user wants to reboot now
-read -p "Do you want to reboot now? (y/n) " -n 1 -r
+read -p "Do you want to reboot now? (y/n) " -n 1 -r < /dev/tty
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Rebooting in 5 seconds... Press Ctrl+C to cancel"

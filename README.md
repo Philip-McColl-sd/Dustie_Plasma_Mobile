@@ -9,12 +9,12 @@
 
 ### One-Line Installation:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
 ```
 
 ### Manual Installation:
 ```bash
-wget https://raw.githubusercontent.com/YOUR_USERNAME/Dustie_Plasma_Mobile/main/scripts/setup.sh
+wget https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -170,8 +170,8 @@ Special thanks to:
 
 ## 📞 Support & Community
 
-- **Issues:** [GitHub Issues](https://github.com/YOUR_USERNAME/Dustie_Plasma_Mobile/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/YOUR_USERNAME/Dustie_Plasma_Mobile/discussions)
+- **Issues:** [GitHub Issues](https://github.com/Philip-McColl-sd/Dustie_Plasma_Mobile/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Philip-McColl-sd/Dustie_Plasma_Mobile/discussions)
 - **KDE Community:** [Plasma Mobile Matrix](https://matrix.to/#/#plasmamobile:matrix.org)
 
 ## 📈 Project Statistics
@@ -223,6 +223,5 @@ If this guide helped you get Plasma Mobile running, please **star this repositor
 
 ---
 
-**⚠️ Important:** Replace `YOUR_USERNAME` in all URLs with your actual GitHub username before publishing.
 
 **📅 Version:** 1.0 | **📆 Date:** October 25, 2025 | **🧪 Tested:** Raspberry Pi 4B (4GB)

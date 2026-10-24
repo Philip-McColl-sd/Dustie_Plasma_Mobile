@@ -41,5 +41,6 @@ The embedded `Logout.qml` is a modified copy of upstream KDE code (GPL-2.0-or-la
 - `README.md`: landing page. `docs/README.md`: the full manual guide (Step 8 is the Waveshare SIM7600G-H 4G HAT cellular modem: power-cycle rules, `mmcli` checks, voice call. Data/APN setup is still open). `docs/Installation-Flow-Diagram.md`: troubleshooting flowchart. `docs/Quick-Reference-Card.md`: command cheat sheet.
 - The same facts (troubleshooting entries, package list, steps) appear in several of these files and in `setup.sh`. When one changes, update the others. `docs/README.md` has a dated Changelog section.
 - `docs/dual_joystick.md` (two KY-023 joysticks over an ADS1118 SPI ADC) and `docs/Get-some-shit-working.md` (casual post-install notes: screenfetch, Brave, Flatpak) are side notes. The Python files that `dual_joystick.md` refers to (`ads1118.py`, `quick_test.py`, etc.) are not in this repo.
-- `YOUR_USERNAME` placeholders in raw.githubusercontent URLs haven't been filled in yet. The URLs in the `setup.sh` header comment also use an older repo/file name (`plasma-mobile-rpi4/.../install.sh`).
+- The GitHub repo is `Philip-McColl-sd/Dustie_Plasma_Mobile`; install URLs use `https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh`.
+- `setup.sh` has to work when piped through `curl | bash`, so every `read` reads from `< /dev/tty`.
 - License: CC BY-SA 4.0.
