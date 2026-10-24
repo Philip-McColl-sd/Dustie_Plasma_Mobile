@@ -1,3 +1,5 @@
+![Alt text](docs/little-rascal-logo.png)
+
 ![Alt text](docs/ensamble_render.png)
 # Plasma Mobile on Raspberry Pi 4
 
