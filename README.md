@@ -1,6 +1,6 @@
 ![Alt text](docs/little-rascal-logo.png)
 
-![Alt text](docs/ensamble_render.png)
+![Alt text](docs/grid2.png)
 # Plasma Mobile on Raspberry Pi 4
 
 <img width="3840" height="1463" alt="plasma-mobile-fondo-blanco" src="https://github.com/user-attachments/assets/78779ad5-8889-4761-a259-676f189d48d1" />
