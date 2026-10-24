@@ -1,5 +1,5 @@
 ![Alt text](docs/little-rascal-logo-horizontal.png)
-
+# One-Line Installation! 👾
 ![Alt text](docs/grid2.png)
 # Plasma Mobile on Raspberry Pi 4
 
