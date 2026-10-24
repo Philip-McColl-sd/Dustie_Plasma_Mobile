@@ -1,3 +1,4 @@
+![Alt text](docs/ensamble_render.png)
 # Plasma Mobile on Raspberry Pi 4
 
 <img width="3840" height="1463" alt="Plasma_Mobile_logo svg" src="https://github.com/user-attachments/assets/d06b7614-40dd-4c2a-819f-350103476565" />
