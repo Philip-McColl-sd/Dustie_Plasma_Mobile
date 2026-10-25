@@ -39,6 +39,10 @@
 #
 # WARNING: this script modifies system configuration (sudoers, SDDM,
 # Plasma files). Use it at your own risk.
+#
+# This file embeds a modified copy of KDE's Logout.qml (section 9.5),
+# which keeps its original copyright notices and remains licensed
+# under GPL-2.0-or-later.
 ################################################################################
 
 set -e  # Exit on error
@@ -391,6 +395,12 @@ sudo tee "$LOGOUT_QML" > /dev/null <<'EOF'
  *   SPDX-FileCopyrightText: 2020 Linus Jahn <lnj@kaidan.im>
  *   SPDX-FileCopyrightText: 2020 Marco Martin <mart@kde.org
  *   SPDX-FileCopyrightText: 2022 Seshan Ravikumar <seshan10@me.com>
+ *   SPDX-FileCopyrightText: 2026 Philip McColl
+ *
+ *   Modified 2026 by Philip McColl for Little Rascal Smart Phone:
+ *   the "switch user" button performs a sequential logout instead of
+ *   calling sessionManagement.switchUser(), to avoid two concurrent
+ *   Wayland sessions on the Raspberry Pi GPU.
  *
  *   SPDX-License-Identifier: GPL-2.0-or-later
  */
