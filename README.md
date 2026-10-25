@@ -1,3 +1,4 @@
+
 ![Alt text](docs/little-rascal-logo-horizontal.png)
 # One-Line Installation! 👾
 ![Alt text](docs/lamina.png)
@@ -7,7 +8,7 @@
 
 # Plasma Mobile on Raspberry Pi 4
 
-<img width="1280" height="488" alt="Plasma_Mobile_logo svg" src="https://github.com/user-attachments/assets/f8bec680-a8c1-426a-8a53-d1a710024abc" />
+<img width="3000" height="3540" alt="Infografía V6 4 · Plasma Mobile real@1x" src="https://github.com/user-attachments/assets/25dd9c6e-f0a0-452e-af8a-e5c0da94a340" />
 
 **The ONLY working guide to install Plasma Mobile on Raspberry Pi 4** - Proven after 2 years of research and testing.\
 
