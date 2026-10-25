@@ -152,7 +152,7 @@ Found an issue? Have an improvement?
 1. Fork this repository
 2. Make your changes
 3. Test on a real Raspberry Pi 4
-4. Submit a pull request
+4. Sign off your commits (`git commit -s`) and submit a pull request - see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## 📜 License
 
