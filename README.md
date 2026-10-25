@@ -10,19 +10,19 @@
 
 <img width="1280" height="720" alt="video-preview" src="https://github.com/user-attachments/assets/2b267dcb-cccd-4988-9de2-9a0873c0e2d3" />
 
-**The ONLY working guide to install Plasma Mobile on Raspberry Pi 4** - Proven after 2 years of research and testing.\
+**A tested, working guide to install Plasma Mobile on Raspberry Pi 4** - the result of 2 years of research and testing.\
 
 **See docs/Installation-Flow-Diagram.md for flow diagram**
 ## 🚀 Quick Start
 
 ### One-Line Installation:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/main/scripts/setup.sh | bash
 ```
 
 ### Manual Installation:
 ```bash
-wget https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh
+wget https://raw.githubusercontent.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/main/scripts/setup.sh
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -35,7 +35,7 @@ This repository contains **the definitive solution** for installing Plasma Mobil
 - ✅ **[Automated Installation Script](scripts/setup.sh)** - One command setup
 - ✅ **[Troubleshooting Flow Diagram](docs/Installation-Flow-Diagram.md)** - Visual guide to solve issues
 - ✅ **[Quick Reference Card](docs/Quick-Reference-Card.md)** - Commands at your fingertips
-- ✅ **100% success rate** - When following these instructions
+- ✅ **Tested on real hardware** - Raspberry Pi 4B
 
 ## 🎯 Why This Works (And Why Others Don't)
 
@@ -98,7 +98,7 @@ Raspberry Pi OS → Based on Debian (Bookworm, now Trixie) → Has plasma-mobile
 
 ## 📊 Success Metrics
 
-- ✅ **100% success rate** following this guide
+- ✅ **Reproduced repeatedly** on Raspberry Pi 4B following this guide
 - ⏱️ **30-60 minutes** total installation time
 - 📦 **150+ packages** installed automatically
 - 💾 **3-4GB** disk space used
@@ -156,15 +156,21 @@ Found an issue? Have an improvement?
 
 ## 📜 License
 
-This project is licensed under **CC BY-SA 4.0** (Creative Commons Attribution-ShareAlike 4.0 International)
+Copyright (C) 2025-2026 Philip McColl
 
-You are free to:
-- ✅ **Share** — copy and redistribute
-- ✅ **Adapt** — remix, transform, and build upon
+| Content | License |
+|---------|---------|
+| `scripts/` (code) | [GPL-3.0-or-later](LICENSE) |
+| `README.md`, `docs/` and images | [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt) |
+| Modified KDE `Logout.qml` embedded in `scripts/setup.sh` | [GPL-2.0-or-later](LICENSES/GPL-2.0-or-later.txt), © its original KDE authors |
 
-Under these terms:
-- **Attribution** — Give appropriate credit
-- **ShareAlike** — Distribute under same license
+The **Little Rascal** name and logo (`docs/little-rascal-logo*.png`) are **not** covered by these licenses: all rights reserved.
+
+This software is provided **without any warranty** (see sections 15 and 16 of the GPL). The installer modifies system configuration (sudoers, SDDM, Plasma files): use it at your own risk.
+
+### Trademarks
+
+This is an independent project, not affiliated with or endorsed by Raspberry Pi Ltd or KDE e.V. "Raspberry Pi" is a trademark of Raspberry Pi Ltd. "KDE" and "Plasma" are trademarks of KDE e.V. All other trademarks belong to their respective owners.
 
 ## 🙏 Credits
 
@@ -178,15 +184,15 @@ Special thanks to:
 
 ## 📞 Support & Community
 
-- **Issues:** [GitHub Issues](https://github.com/Philip-McColl-sd/Dustie_Plasma_Mobile/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/Philip-McColl-sd/Dustie_Plasma_Mobile/discussions)
+- **Issues:** [GitHub Issues](https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/discussions)
 - **KDE Community:** [Plasma Mobile Matrix](https://matrix.to/#/#plasmamobile:matrix.org)
 
 ## 📈 Project Statistics
 
 - **Development Time:** 2 years
 - **Methods Tested:** 5+ different approaches
-- **Final Success Rate:** 100%
+- **Status:** Working on Raspberry Pi 4B (Debian 13 Trixie)
 - **Lines of Code in Installer:** 400+
 - **Documentation Pages:** 4 comprehensive guides
 
@@ -215,7 +221,7 @@ If this guide helped you get Plasma Mobile running, please **star this repositor
 
 ---
 
-**Made with ❤️ by the community, for the community**
+**Made with ❤️ by Philip McColl, for the community**
 
 *This guide represents 2 years of dedication to making mobile Linux accessible on Raspberry Pi 4*
 
@@ -233,10 +239,3 @@ If this guide helped you get Plasma Mobile running, please **star this repositor
 
 
 **📅 Version:** 1.0 | **📆 Date:** October 25, 2025 | **🧪 Tested:** Raspberry Pi 4B (4GB)
-
-## Licencia
-Copyright (C) 2026 Philip McColl
-
-Este programa es software libre: puedes redistribuirlo y/o modificarlo
-bajo los términos de la GNU Affero General Public License v3, publicada
-por la Free Software Foundation. Ver el archivo LICENSE.

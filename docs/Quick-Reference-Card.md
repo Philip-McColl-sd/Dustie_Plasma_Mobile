@@ -2,7 +2,7 @@
 
 ## 🚀 One-Line Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/main/scripts/setup.sh | bash
 ```
 
 ## 📝 Manual Installation (Copy-Paste Commands)
