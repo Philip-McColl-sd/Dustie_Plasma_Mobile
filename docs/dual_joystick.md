@@ -5,7 +5,7 @@ A complete guide for connecting two KY-023 dual-axis joystick modules to a Raspb
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![Hardware](https://img.shields.io/badge/hardware-Raspberry%20Pi%204-red.svg)
 ![Python](https://img.shields.io/badge/python-3.7+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![License](https://img.shields.io/badge/license-CC%20BY--SA%204.0-lightgrey.svg)
 
 ## 📋 Table of Contents
 
@@ -228,21 +228,23 @@ python3 -c "import spidev; import RPi.GPIO; print('Libraries installed successfu
 
 ### Step 5: Download Project Files
 
+> **Note:** the joystick Python code is not yet published in this repository. It will be added under `scripts/` (GPL-3.0-or-later). Until then, copy the examples from this guide to your Pi (see [File Transfer Methods](#file-transfer-methods)).
+
 Choose one of the following methods:
 
 #### Option A: Clone from GitHub
 
 ```bash
-git clone https://github.com/yourusername/dual-joystick-controller.git
-cd dual-joystick-controller
+git clone https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone.git
+cd Little_Rascal_Smart_Phone
 ```
 
 #### Option B: Download as ZIP
 
 ```bash
-wget https://github.com/yourusername/dual-joystick-controller/archive/main.zip
+wget https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/archive/main.zip
 unzip main.zip
-cd dual-joystick-controller-main
+cd Little_Rascal_Smart_Phone-main
 ```
 
 #### Option C: Manual Download
@@ -970,8 +972,8 @@ Contributions are welcome! Here's how you can help:
 ### Development Setup
 
 ```bash
-git clone https://github.com/yourusername/dual-joystick-controller.git
-cd dual-joystick-controller
+git clone https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone.git
+cd Little_Rascal_Smart_Phone
 
 # Create virtual environment (optional)
 python3 -m venv venv
@@ -983,31 +985,11 @@ pip3 install -e .
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Copyright (C) 2025-2026 Philip McColl
 
-```
-MIT License
-
-Copyright (c) 2024 [Your Name]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+This document is licensed under [CC BY-SA 4.0](../LICENSES/CC-BY-SA-4.0.txt).
+The code examples it contains may also be used, at your option, under
+[GPL-3.0-or-later](../LICENSE). See the main [README](../README.md#-license).
 
 ## 🔗 Related Resources
 
@@ -1031,9 +1013,8 @@ SOFTWARE.
 
 For questions, issues, or suggestions:
 
-- **GitHub Issues**: [Create an issue](https://github.com/yourusername/dual-joystick-controller/issues)
-- **Email**: your.email@example.com
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/dual-joystick-controller/discussions)
+- **GitHub Issues**: [Create an issue](https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/discussions)
 
 ## ✨ Acknowledgments
 
