@@ -9,7 +9,8 @@
 
 # Plasma Mobile on Raspberry Pi 4
 
-<img width="1280" height="720" alt="video-preview" src="https://github.com/user-attachments/assets/2b267dcb-cccd-4988-9de2-9a0873c0e2d3" />
+<img width="1280" height="488" alt="Plasma_Mobile_logo svg" src="https://github.com/user-attachments/assets/b8028824-20c7-4326-953c-b8fe6cebab83" />
+
 
 **The ONLY working guide to install Plasma Mobile on Raspberry Pi 4** - Proven after 2 years of research and testing.\
 
