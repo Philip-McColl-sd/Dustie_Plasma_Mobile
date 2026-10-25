@@ -1,3 +1,10 @@
+## Licencia
+Copyright (C) 2026 Philip McColl
+
+Este programa es software libre: puedes redistribuirlo y/o modificarlo
+bajo los términos de la GNU Affero General Public License v3, publicada
+por la Free Software Foundation. Ver el archivo LICENSE.
+
 ![Alt text](docs/little-rascal-logo-horizontal.png)
 # One-Line Installation! 👾
 ![Alt text](docs/Infograf.png)
