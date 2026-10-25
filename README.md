@@ -1,13 +1,6 @@
-## Licencia
-Copyright (C) 2026 Philip McColl
-
-Este programa es software libre: puedes redistribuirlo y/o modificarlo
-bajo los términos de la GNU Affero General Public License v3, publicada
-por la Free Software Foundation. Ver el archivo LICENSE.
-
 ![Alt text](docs/little-rascal-logo-horizontal.png)
 # One-Line Installation! 👾
-![Alt text](docs/Infograf.png)
+![Alt text](docs/lamina.png)
 
 [![Ver el video](docs/video-preview.png)](https://www.youtube.com/watch?v=0w1ryLOrj5M)
 
@@ -239,3 +232,10 @@ If this guide helped you get Plasma Mobile running, please **star this repositor
 
 
 **📅 Version:** 1.0 | **📆 Date:** October 25, 2025 | **🧪 Tested:** Raspberry Pi 4B (4GB)
+
+## Licencia
+Copyright (C) 2026 Philip McColl
+
+Este programa es software libre: puedes redistribuirlo y/o modificarlo
+bajo los términos de la GNU Affero General Public License v3, publicada
+por la Free Software Foundation. Ver el archivo LICENSE.
