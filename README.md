@@ -4,7 +4,7 @@
 
 ![Alt text](docs/lamina.png)
 
-[![Ver el video](docs/video-preview.png)](https://youtu.be/av3fPSf0-EM))
+[![Ver el video](docs/video-preview.png)](https://youtu.be/av3fPSf0-EM)
 
 
 # Plasma Mobile on Raspberry Pi 4
