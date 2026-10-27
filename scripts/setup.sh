@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-FileCopyrightText: 2025-2026 Philip McColl
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 ################################################################################
 # Plasma Mobile on Raspberry Pi 4 - Automated Installation Script
 # 
@@ -11,16 +14,35 @@
 #   - Sudo privileges
 #
 # Usage:
-#   wget https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh
+#   wget https://raw.githubusercontent.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/main/scripts/setup.sh
 #   chmod +x setup.sh
 #   ./setup.sh
 #
 # Or one-liner:
-#   curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Dustie_Plasma_Mobile/main/scripts/setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Philip-McColl-sd/Little_Rascal_Smart_Phone/main/scripts/setup.sh | bash
 #
 # Version: 1.0
 # Date: 2025-10-25
 # Tested: Raspberry Pi 4B (4GB), Raspberry Pi OS Lite 64-bit
+#
+# Copyright (C) 2025-2026 Philip McColl
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# WARNING: this script modifies system configuration (sudoers, SDDM,
+# Plasma files). Use it at your own risk.
+#
+# This file embeds a modified copy of KDE's Logout.qml (section 9.5),
+# which keeps its original copyright notices and remains licensed
+# under GPL-2.0-or-later.
 ################################################################################
 
 set -e  # Exit on error
@@ -373,6 +395,12 @@ sudo tee "$LOGOUT_QML" > /dev/null <<'EOF'
  *   SPDX-FileCopyrightText: 2020 Linus Jahn <lnj@kaidan.im>
  *   SPDX-FileCopyrightText: 2020 Marco Martin <mart@kde.org
  *   SPDX-FileCopyrightText: 2022 Seshan Ravikumar <seshan10@me.com>
+ *   SPDX-FileCopyrightText: 2026 Philip McColl
+ *
+ *   Modified 2026 by Philip McColl for Little Rascal Smart Phone:
+ *   the "switch user" button performs a sequential logout instead of
+ *   calling sessionManagement.switchUser(), to avoid two concurrent
+ *   Wayland sessions on the Raspberry Pi GPU.
  *
  *   SPDX-License-Identifier: GPL-2.0-or-later
  */
