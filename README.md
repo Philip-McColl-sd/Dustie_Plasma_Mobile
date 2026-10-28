@@ -165,6 +165,8 @@ Copyright (C) 2025-2026 Philip McColl
 | `scripts/` (code) | [GPL-3.0-or-later](LICENSE) |
 | `README.md`, `docs/` and images | [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt) |
 | Modified KDE `Logout.qml` embedded in `scripts/setup.sh` | [GPL-2.0-or-later](LICENSES/GPL-2.0-or-later.txt), © its original KDE authors |
+| `hardware/` (case: STEP, 3MF, STL, sketches, drawings, renders, profiles) | CC BY-SA 4.0 |
+| `hardware/*/src/` (case parametric's code) | GPL-3.0-or-later |
 
 The **Little Rascal** name and logo (`docs/little-rascal-logo*.png`) are **not** covered by these licenses: all rights reserved.
 
