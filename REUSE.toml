@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2025-2026 Philip McColl
+# SPDX-License-Identifier: CC0-1.0
+#
+# Per-file licensing for the Panel5 enclosure (REUSE convention, https://reuse.software).
+# If the repository already has a REUSE.toml at its root, merge these [[annotations]] blocks into it.
+version = 1
+
+[[annotations]]
+path = [
+  "hardware/panel5-v6/print/**",
+  "hardware/panel5-v6/cad/**",
+  "hardware/panel5-v6/stl/**",
+  "hardware/panel5-v6/drawings/**",
+  "hardware/panel5-v6/images/Panel5_V6.9_Renders.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 Philip McColl"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+[[annotations]]
+path = "hardware/panel5-v6/images/Panel5_V6.9_Exploded_View_1080p.png"
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["2025-2026 Philip McColl", "KDE contributors (Plasma Mobile screenshot on the display)"]
+SPDX-License-Identifier = "CC-BY-SA-4.0 AND CC0-1.0"
